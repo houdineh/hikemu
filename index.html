@@ -382,18 +382,6 @@
       animation: fade-up 0.75s cubic-bezier(0.22,1,0.36,1) 0.5s both;
     }
 
-    /* live age line */
-    #live-age-line {
-      font-family: var(--font);
-      font-weight: 500;
-      font-size: 17px;
-      color: var(--fg);
-      letter-spacing: -0.01em;
-      opacity: 0.22;
-      margin-bottom: 28px;
-      animation: fade-up 0.75s cubic-bezier(0.22,1,0.36,1) 0.6s both;
-    }
-
     .tagline {
       font-family: var(--font);
       font-weight: 500;
@@ -528,6 +516,20 @@
     .section-list li:hover::before { opacity: 0.35; transform: translateX(0); }
     .section-list:hover li { opacity: 0.3; }
     .section-list:hover li:hover { opacity: 1; }
+
+    .section-list .repo-link {
+      font-family: inherit;
+      font-weight: inherit;
+      font-size: inherit;
+      color: inherit;
+      letter-spacing: inherit;
+      text-decoration: none;
+      cursor: none;
+    }
+    .section-list .repo-link:hover {
+      text-decoration: underline;
+      text-underline-offset: 4px;
+    }
 
     /* fun facts ambient float */
     .s-facts .section-list li:nth-child(1) { animation: li-float 7s 0.0s ease-in-out infinite; }
@@ -707,6 +709,55 @@
     }
     #rc-tip.show { opacity: 0.4; }
 
+    /* ── REPO PREVIEW CARD ── */
+    #repo-preview {
+      position: fixed;
+      pointer-events: none;
+      z-index: 9002;
+      width: 260px;
+      padding: 14px 16px;
+      border-radius: 10px;
+      background: var(--bg);
+      border: 1px solid rgba(128,128,128,0.18);
+      box-shadow: 0 14px 36px rgba(0,0,0,0.14);
+      font-family: var(--font);
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 0.22s ease, transform 0.22s ease;
+    }
+    #repo-preview.show { opacity: 1; transform: translateY(0); }
+    #repo-preview .rp-name {
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--fg);
+      letter-spacing: -0.01em;
+      margin-bottom: 5px;
+    }
+    #repo-preview .rp-desc {
+      font-size: 12.5px;
+      color: var(--fg);
+      opacity: 0.6;
+      line-height: 1.45;
+      margin-bottom: 9px;
+    }
+    #repo-preview .rp-meta {
+      font-size: 11.5px;
+      color: var(--fg);
+      opacity: 0.45;
+      display: flex;
+      gap: 14px;
+      align-items: center;
+    }
+    #repo-preview .rp-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 5px;
+      background: var(--fg);
+      opacity: 0.6;
+      vertical-align: middle;
+    }
+
     /* ── FOCUS MODE OVERLAY ── */
     #focus-overlay {
       pointer-events: none;
@@ -821,6 +872,7 @@
   <div id="easter-msg" aria-hidden="true"></div>
   <div id="dbl-quote" aria-hidden="true"></div>
   <div id="rc-tip" aria-hidden="true"></div>
+  <div id="repo-preview" aria-hidden="true"></div>
   <div id="idle-indicator" aria-hidden="true">· · ·</div>
   <button id="sound-toggle" aria-label="toggle sound">♪</button>
 
@@ -854,14 +906,13 @@
           <div class="name-ghost" id="name-ghost">hikemu</div>
         </div><span class="name-cursor" id="name-cursor">_</span>
       </div>
-      <div class="name-sub">dallas, tx &mdash; est. 2006</div>
-      <div id="live-age-line"></div>
+      <div class="name-sub">dallas, tx</div>
       <div class="tagline" id="tagline">self-taught, frontend-focused software engineer with a knack for making things look nice. also really into retro gaming and obscure anime.</div>
     </div>
 
     <!-- Social -->
     <div class="social reveal">
-      <a href="https://github.com/houdineh" target="_blank" rel="noopener noreferrer">github</a>
+      <a href="https://github.com/nothikemu" target="_blank" rel="noopener noreferrer">github</a>
       <a href="https://discord.com/users/1338171592882262088" target="_blank" rel="noopener noreferrer">discord</a>
     </div>
 
@@ -879,8 +930,7 @@
     <section class="section s-facts scroll-reveal">
       <div class="section-title">fun facts</div>
       <ul class="section-list" id="facts-list">
-        <li>i'm 18 years old</li>
-        <li>i was a swift student challenge winner in 2022</li>
+        <li>professional python connoisseur</li>
         <li>i'm pretty good at singing</li>
         <li>i'm an avid watcher of hell's paradise</li>
         <li>in case you see me and feel the need to ask, i'm asian</li>
@@ -890,10 +940,9 @@
     <!-- Works -->
     <section class="section s-works scroll-reveal">
       <div class="section-title">works</div>
-      <ul class="section-list scramble-list">
-        <li data-text="simple database">simple database</li>
-        <li data-text="selfmade rust compiler">selfmade rust compiler</li>
-        <li data-text="analytical data mapper">analytical data mapper</li>
+      <ul class="section-list" id="works-list">
+        <li><a href="https://github.com/nothikemu/hikemu" target="_blank" rel="noopener noreferrer" class="repo-link" data-repo="nothikemu/hikemu">this website</a></li>
+        <li><a href="https://github.com/nothikemu/discord" target="_blank" rel="noopener noreferrer" class="repo-link" data-repo="nothikemu/discord">discord bot template deluxe</a></li>
       </ul>
     </section>
 
@@ -1143,7 +1192,7 @@
       });
     });
 
-    /* ── TEXT SCRAMBLE on works items ── */
+    /* ── TEXT SCRAMBLE on philosophy items ── */
     const chars = 'abcdefghijklmnopqrstuvwxyz·—○◇';
     function scramble(el, original) {
       let frame = 0;
@@ -1190,20 +1239,6 @@
       .map((w, i) => `<span class="word" style="transition-delay:${i * 0.018}s">${w}</span>`)
       .join(' ');
 
-    /* ── LIVE AGE ── */
-    const BIRTH = new Date('2006-01-01'); // adjust to real birthday if wanted
-    function updateAge() {
-      const now = new Date();
-      let years  = now.getFullYear() - BIRTH.getFullYear();
-      let months = now.getMonth()    - BIRTH.getMonth();
-      let days   = now.getDate()     - BIRTH.getDate();
-      if (days   < 0) { months--; days += new Date(now.getFullYear(), now.getMonth(), 0).getDate(); }
-      if (months < 0) { years--;  months += 12; }
-      $('live-age-line').textContent = `${years}y ${months}mo ${days}d old`;
-    }
-    updateAge();
-    setInterval(updateAge, 60000);
-
     /* ── PHILOSOPHY TYPEWRITER ── */
     let typeTO = null, typeActive = false;
     function typewriteList(items) {
@@ -1233,6 +1268,64 @@
     const philItems = [...philSec.querySelectorAll('.section-list li')];
     philSec.addEventListener('mouseenter', () => typewriteList(philItems));
     philSec.addEventListener('mouseleave', () => restoreList(philItems));
+
+    /* ── REPO PREVIEW CARDS (works section) ── */
+    const repoPreview = $('repo-preview');
+    const repoCache = {};
+    let repoPreviewTarget = null;
+
+    async function loadRepo(repo) {
+      if (repo in repoCache) return repoCache[repo];
+      try {
+        const res = await fetch(`https://api.github.com/repos/${repo}`);
+        if (!res.ok) throw new Error('not ok');
+        const data = await res.json();
+        repoCache[repo] = data;
+        return data;
+      } catch (err) {
+        repoCache[repo] = null;
+        return null;
+      }
+    }
+
+    function renderRepoPreview(data, repo) {
+      if (!data) {
+        repoPreview.innerHTML = `<div class="rp-name">${repo}</div><div class="rp-desc">preview unavailable</div>`;
+        return;
+      }
+      const desc   = data.description || 'no description';
+      const lang   = data.language || '';
+      const stars  = data.stargazers_count ?? 0;
+      repoPreview.innerHTML = `
+        <div class="rp-name">${data.full_name}</div>
+        <div class="rp-desc">${desc}</div>
+        <div class="rp-meta">
+          ${lang ? `<span><span class="rp-dot"></span>${lang}</span>` : ''}
+          <span>★ ${stars}</span>
+        </div>
+      `;
+    }
+
+    document.querySelectorAll('.repo-link').forEach(link => {
+      const repo = link.getAttribute('data-repo');
+      link.addEventListener('mouseenter', async () => {
+        repoPreviewTarget = link;
+        repoPreview.innerHTML = `<div class="rp-name">${repo}</div><div class="rp-desc">loading…</div>`;
+        repoPreview.classList.add('show');
+        const data = await loadRepo(repo);
+        if (repoPreviewTarget === link) renderRepoPreview(data, repo);
+      });
+      link.addEventListener('mousemove', e => {
+        const x = Math.min(e.clientX + 16, window.innerWidth  - 280);
+        const y = Math.min(e.clientY + 16, window.innerHeight - 130);
+        repoPreview.style.left = x + 'px';
+        repoPreview.style.top  = y + 'px';
+      });
+      link.addEventListener('mouseleave', () => {
+        repoPreviewTarget = null;
+        repoPreview.classList.remove('show');
+      });
+    });
 
     /* ── SOCIAL RIPPLE ── */
     document.querySelectorAll('.social a').forEach(a => {
@@ -1384,12 +1477,12 @@
       }
     });
 
-    /* ── HOUDINI SECRET WORD ── */
-    let houdiniBuffer = '';
+    /* ── SECRET WORD ── */
+    let secretBuffer = '';
     document.addEventListener('keypress', e => {
-      houdiniBuffer = (houdiniBuffer + e.key).slice(-7);
-      if (houdiniBuffer.toLowerCase() === 'houdini') {
-        houdiniBuffer = '';
+      secretBuffer = (secretBuffer + e.key).slice(-9);
+      if (secretBuffer.toLowerCase() === 'nothikemu') {
+        secretBuffer = '';
         spawnConfetti();
         eMsg.textContent = '🎩 you know the trick.';
         eMsg.classList.add('show');
@@ -1465,7 +1558,7 @@
         const desc  = w.weatherDesc[0].value.toLowerCase();
         const tempF = w.temp_F;
         const sub = $('name-sub');
-        if (sub) sub.textContent = `dallas, tx — est. 2006 · ${desc}, ${tempF}°f`;
+        if (sub) sub.textContent = `dallas, tx · ${desc}, ${tempF}°f`;
       })
       .catch(() => {}); // silently fail if blocked
 
